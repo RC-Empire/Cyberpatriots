@@ -20,14 +20,19 @@ cls
 	echo 102)Firewall Policy
 	echo 103)Lockout Policy 
 	echo 104) remote desktop (enable/disable)
-	echo needs to be tested  
 	echo 105) diable guest
+	echo needs to be tested
+	echo 106) Turn onCautomatic_Updates
+
+	echo 
 	set /p answer=Please choose an option: 
 		if "%answer%"=="101" goto :rcpasswordpolicy
 		if "%answer%"=="102" goto :rcenablefirewallpolicy
 		if "%answer%"=="103" goto :rclockout
 		if "%answer%"=="104" goto :RCRemoteDesktop
 		if "%answer%"=="105" goto :RCdisable_guest
+		if "%answer%"=="106" goto :RCautomatic_Updates
+
 		if "%answer%"=="41" exit
 		if "%answer%"=="67" shutdown /r
 	pause
@@ -144,6 +149,13 @@ cls
 	pause
 	goto :menu
 
+:RCautomatic_Updates
+	rem Turn on automatic updates
+	echo Turning on automatic updates
+	reg add "HKLM\SOFTWARE\Microsoft\WINDOWS\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 4 /f
 
+	pause
+	goto :menu
 
 endlocal
+
