@@ -1,0 +1,181 @@
+ CyberPatriot Packet Tracer Methodology
+
+
+- Write down every change you make
+- Test connectivity after big changes
+- Tackle high-point items first
+- Stay organized across all devices
+
+
+ General Methodology
+
+ 0-15 Minutes: Get Oriented
+Open the file, look at the topology, split up devices, open your notes.
+
+ 15-30 Minutes: Scout It Out
+Map the network, try default logins, find all the devices, figure out what services matter.
+
+After 30 Minutes: Lock It Down
+Apply configs one device at a time. Write down what you do. Test as you go. Check the scoring report.
+
+Make sure it works in your remaining time:
+Test everything. Verify services. Check your security configs. Go through the checklist. 
+Save all configs. Save the .pkt file. One last score check. Submit docs.
+
+---
+
+Common Configurations (ALL PASSWORD HERE ARE EXAMPLES)
+
+Basic Router and Switch Security
+
+Router> enable
+Router configure terminal
+Router(config) enable secret class
+Router(config) service password-encryption
+
+Securing Console Access
+
+Router(config) line console 0
+Router(config-line) password cisco
+Router(config-line) login
+Router(config-line) logging synchronous
+Router(config-line) exec-timeout 5 0
+Router(config-line) exit
+
+
+Locking Down Remote Access
+
+Router(config) line vty 0 4
+Router(config-line) transport input ssh
+Router(config-line) password cisco
+Router(config-line) login local
+Router(config-line) exec-timeout 5 0
+Router(config-line) exit
+
+SSH
+
+Router(config) hostname R1-Gateway
+Router(config) ip domain-name cyberpatriot.local
+Router(config) crypto key generate rsa
+! Pick 1024 when it asks for key size
+Router(config) ip ssh version 2
+Router(config) ip ssh time-out 60
+Router(config) ip ssh authentication-retries 3
+
+Creating User Accounts
+
+Router(config) username admin privilege 15 secret Cisco123!
+
+Turn Off What You Don't Need
+
+(These services are usually just attack vectors)
+
+Router(config) no cdp run
+Router(config) no service dhcp
+Router(config) no ip domain-lookup
+Router(config) no ip source-route
+
+Warning Banner
+
+Let people know they shouldn't be here:
+
+Router(config) banner motd #UNAUTHORIZED ACCESS PROHIBITED#
+
+Securing Interfaces (If an interface isn't being used, shut it down):
+
+Router(config) interface gigabitEthernet 0/2
+Router(config-if) shutdown
+Router(config-if) exit
+
+Access Control Lists
+
+Protecting VTY Lines:
+
+Router(config) access-list 10 permit 192.168.1.0 0.0.0.255
+Router(config) access-list 10 deny any log
+Router(config) line vty 0 4
+Router(config-line) access-class 10 in
+
+Filtering Traffic:
+
+Router(config) ip access-list extended WEB_ONLY
+Router(config-ext-nacl) permit tcp 192.168.1.0 0.0.0.255 any eq 80
+Router(config-ext-nacl) permit tcp 192.168.1.0 0.0.0.255 any eq 443
+Router(config-ext-nacl) deny ip any any log
+Router(config-ext-nacl) exit
+Router(config) interface gigabitEthernet 0/1
+Router(config-if) ip access-group WEB_ONLY in
+
+Port Security on Switches
+
+Switch(config) interface fastEthernet 0/5
+Switch(config-if) switchport mode access
+Switch(config-if) switchport port-security
+Switch(config-if) switchport port-security maximum 2
+Switch(config-if) switchport port-security mac-address sticky
+Switch(config-if) switchport port-security violation restrict
+
+VLAN Hardening
+
+Don't use VLAN 1 as your native VLAN:
+
+Switch(config) interface gigabitEthernet 0/1
+Switch(config-if) switchport trunk native vlan 999
+
+Get rid of VLANs you're not using:
+
+Switch(config) no vlan 10
+
+Securing Routing Protocols (OSPF)
+
+Router(config) router ospf 1
+Router(config-router) passive-interface default
+Router(config-router) no passive-interface gigabitEthernet 0/0
+Router(config-router) exit
+
+DHCP Snooping
+
+Switch(config) ip dhcp snooping
+Switch(config) ip dhcp snooping vlan 10
+Switch(config) interface gigabitEthernet 0/1
+Switch(config-if) ip dhcp snooping trust
+Switch(config-if) exit
+
+---
+
+ Scoring Smart
+
+ Hit These First (Most Points)
+1. Change default passwords
+2. Turn on password encryption
+3. Kill Telnet, enable SSH
+4. Disable services you don't need
+5. Basic ACLs
+
+ Do These Next
+1. Port security
+2. Routing protocol auth
+3. Detailed logging
+4. Interface hardening
+5. Banners
+
+ If You Have Time
+1. Advanced ACLs
+2. DHCP snooping
+3. Detailed descriptions
+4. Other security features
+
+
+ Ports You Should Know
+- SSH: 22
+- Telnet: 23
+- HTTP: 80
+- HTTPS: 443
+- DNS: 53
+- DHCP: 67/68
+
+Resources
+
+- Cisco IOS Commands: https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-15-4m-t/products-command-reference-list.html
+- CyberPatriot: https://www.uscyberpatriot.org/
+- Packet Tracer: https://www.netacad.com/courses/packet-tracer
